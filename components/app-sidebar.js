@@ -8,6 +8,7 @@ import {
   BadgeDollarSign,
   HandCoins,
   CircleDollarSign,
+  BadgeCent,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -64,6 +65,11 @@ const items = [
     title: "Payments",
     url: "https://payfari.co.zw/",
     icon: CircleDollarSign,
+  },
+  {
+    title: "Blockchain",
+    url: "/dashboard/blockchain",
+    icon: BadgeCent,
   },
 ];
 
