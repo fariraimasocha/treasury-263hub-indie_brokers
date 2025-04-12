@@ -1,7 +1,5 @@
 ## Route Structure Summary
 
-
-
 1. **Department Routes**
 
 1. GET /api/departments - List all departments
@@ -18,18 +16,20 @@
 
 3. **Budget Routes**
 
-1. GET /api/budgets - List budgets (filterable by department and fiscal year)
+1. GET /api/budgets - List budgets (filterable by department, year, quarter, and status)
 2. POST /api/budgets - Create a new budget
+3. POST /api/budgets/[id]/approve - Approve a budget
+4. POST /api/budgets/[id]/reject - Reject a budget
 
 
 
 4. **Fund Request Routes**
 
-1. GET /api/requests - List fund requests (filterable by department and status)
+1. GET /api/requests - List fund requests (filterable by department, status, year, and quarter)
 2. POST /api/requests - Create a new fund request
 3. GET /api/requests/[id] - Get a specific fund request
 4. PUT /api/requests/[id] - Update a fund request
-5. DELETE /api/requests/[id] - Delete a fund request (only if in DRAFT status)
+5. DELETE /api/requests/[id] - Delete a fund request (only if in draft status)
 6. POST /api/requests/[id]/approve - Approve a fund request
 7. POST /api/requests/[id]/reject - Reject a fund request
 8. POST /api/requests/[id]/disburse - Disburse funds for an approved request
