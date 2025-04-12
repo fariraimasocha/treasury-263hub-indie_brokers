@@ -2,11 +2,7 @@ import mongoose from "mongoose";
 import { refreshModel } from "@/utils/modelUtils";
 const userSchema = new mongoose.Schema(
   {
-    first_name: {
-      type: String,
-      required: true,
-    },
-    last_name: {
+    name: {
       type: String,
       required: true,
     },

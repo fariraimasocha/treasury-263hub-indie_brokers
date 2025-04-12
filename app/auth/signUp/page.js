@@ -9,7 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
+import CircularSpinner from "@/components/Loading";
 import {
   Form,
   FormControl,
@@ -25,6 +25,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z
   .object({
@@ -97,7 +98,7 @@ export default function SignUp() {
           router.push("/auth/signIn");
         } else {
           toast.success("Account created successfully");
-          router.push("/onboarding");
+          router.push("/dashboard");
         }
       } else {
         toast.error("An error occurred");
@@ -218,21 +219,13 @@ export default function SignUp() {
               )}
             />
 
-            <LoadingButton type="submit" className="w-full" loading={isLoading}>
-              Sign Up
-            </LoadingButton>
-
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link
-                  href="/auth/signIn"
-                  className="text-primary hover:underline"
-                >
-                  Sign In
-                </Link>
-              </p>
-            </div>
+            <Button type="submit" className="w-full">
+              {isLoading ? (
+                <CircularSpinner size="small" color="text-gray-900" />
+              ) : (
+                "Sign Up"
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>

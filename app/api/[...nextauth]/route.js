@@ -2,17 +2,17 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import User from "@/models/user";
 import { connect } from "@/utils/connect";
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 
 async function login(credentials) {
   try {
     await connect();
     const user = await User.findOne({ email: credentials.email });
     if (!user) throw new Error("Wrong Credentials.");
-    
+
     const isMatch = await bcrypt.compare(credentials.password, user.password);
     if (!isMatch) throw new Error("Wrong Credentials.");
-    
+
     return user;
   } catch (error) {
     console.log("Error logging in:", error);
@@ -29,7 +29,7 @@ export const authOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
@@ -41,15 +41,15 @@ export const authOptions = {
               name: user.name,
               phone: user.phone,
               role: user.role,
-              verified: user.verified
+              verified: user.verified,
             };
           }
         } catch (error) {
           console.log("Authorization error:", error.message);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -73,7 +73,7 @@ export const authOptions = {
         session.user.verified = token.verified;
       }
       return session;
-    }
+    },
   },
   secret: process.env.NEXT_AUTH_SECRET,
 };

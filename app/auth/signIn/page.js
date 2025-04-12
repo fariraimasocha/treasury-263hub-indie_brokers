@@ -9,7 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -19,12 +19,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import toast from "react-hot-toast";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import CircularSpinner from "@/components/Loading";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -120,27 +120,13 @@ export default function SignIn() {
               )}
             />
 
-            <LoadingButton type="submit" className="w-full" loading={isLoading}>
-              Sign In
-            </LoadingButton>
-
-            <div className="mt-4 text-center space-y-2">
-              <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/auth/signUp"
-                  className="text-primary hover:underline"
-                >
-                  Sign Up
-                </Link>
-              </p>
-              <Link
-                href="/auth/forgotPassword"
-                className="text-sm text-primary hover:underline block"
-              >
-                Forgot Password?
-              </Link>
-            </div>
+            <Button type="submit" className="w-full">
+              {isLoading ? (
+                <CircularSpinner size="small" color="text-gray-900" />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>
