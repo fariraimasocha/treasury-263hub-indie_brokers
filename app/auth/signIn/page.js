@@ -32,7 +32,7 @@ const formSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export default function Home() {
+export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
