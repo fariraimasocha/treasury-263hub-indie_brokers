@@ -71,21 +71,6 @@ export default function SignUp() {
       });
 
       if (response.ok) {
-        // Send welcome email
-        await fetch("/api/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            type: "registration",
-            userData: {
-              name: data.name,
-              email: data.email,
-            },
-          }),
-        });
-
         // Sign in the user automatically after registration
         const signInResult = await signIn("credentials", {
           email: data.email,
@@ -93,19 +78,22 @@ export default function SignUp() {
           redirect: false,
         });
 
+        console.log("SignIn result:", signInResult); // See what's happening
+
         if (signInResult?.error) {
-          toast.error("Account created but couldn't sign in automatically");
+          toast.error(`Sign-in failed: ${signInResult.error}`);
           router.push("/auth/signIn");
         } else {
-          toast.success("Account created successfully");
+          toast.success("Account created and signed in successfully!");
           router.push("/dashboard");
         }
       } else {
-        toast.error("An error occurred");
+        const errorData = await response.json();
+        toast.error(errorData.message || "Registration failed");
       }
     } catch (error) {
-      console.error("Error while creating user", error);
-      toast.error("An error occurred");
+      console.error("Error during registration process:", error);
+      toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -226,7 +214,7 @@ export default function SignUp() {
                 "Sign Up"
               )}
             </Button>
-            <div className="mt-4 text-center">
+            <div className="text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link
