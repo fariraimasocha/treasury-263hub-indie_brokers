@@ -32,17 +32,17 @@
 5. DELETE /api/requests/[id] - Delete a fund request (only if in draft status)
 6. POST /api/requests/[id]/approve - Approve a fund request
 7. POST /api/requests/[id]/reject - Reject a fund request
-8. POST /api/requests/[id]/disburse - Disburse funds for an approved request
+8. POST /api/requests/[id]/payout - payout funds for an approved request
 
 
 
-5. **Disbursement Routes**
+5. **payout Routes**
 
-1. GET /api/disbursements - List disbursements (filterable by request ID)
-2. POST /api/disbursements/[id]/settle - Settle a disbursement
+1. GET /api/payouts - List payouts (filterable by request ID)
+2. POST /api/payouts/[id]/settle - Settle a payout
 
 
 
 6. **Settlement Routes**
 
-1. GET /api/settlements - List settlements (filterable by request ID and disbursement ID)
+1. GET /api/settlements - List settlements (filterable by request ID and payout ID)

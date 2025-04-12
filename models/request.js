@@ -27,7 +27,7 @@ const fundRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["draft", "submitted", "under_review", "approved", "rejected", "disbursed", "settled"],
+      enum: ["draft", "submitted", "under_review", "approved", "rejected", "payoutd", "settled"],
       default: "draft",
     },
     priority: {

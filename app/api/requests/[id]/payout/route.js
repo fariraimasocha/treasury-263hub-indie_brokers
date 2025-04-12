@@ -1,8 +1,8 @@
-// app/api/fund-requests/[id]/disburse/route.js
+// app/api/fund-requests/[id]/payout/route.js
 import { NextResponse } from "next/server";
 import { connect } from "@/utils/connect";
 import FundRequest from "@/models/request";
-import Disbursement from "@/models/disbursement";
+import payout from "@/models/payout";
 import Budget from "@/models/budget";
 import mongoose from "mongoose";
 
@@ -13,11 +13,11 @@ export async function POST(req, { params }) {
   try {
     await connect();
     const { id } = params;
-    const { disbursedBy, transactionReference, notes } = await req.json();
+    const { payoutdBy, transactionReference, notes } = await req.json();
 
-    if (!disbursedBy || !transactionReference) {
+    if (!payoutdBy || !transactionReference) {
       return NextResponse.json(
-        { message: "Disburser ID and transaction reference are required" },
+        { message: "payoutr ID and transaction reference are required" },
         { status: 400 }
       );
     }
@@ -37,7 +37,7 @@ export async function POST(req, { params }) {
       await session.abortTransaction();
       session.endSession();
       return NextResponse.json(
-        { message: "Only approved requests can be disbursed" },
+        { message: "Only approved requests can be payoutd" },
         { status: 400 }
       );
     }
@@ -63,7 +63,7 @@ export async function POST(req, { params }) {
     if (!budget.remainingAmount || budget.remainingAmount < fundRequest.amount) {
       // Reject the request due to insufficient budget
       fundRequest.status = "rejected";
-      fundRequest.rejectionReason = "Insufficient budget for disbursement";
+      fundRequest.rejectionReason = "Insufficient budget for payout";
       await fundRequest.save({ session });
       
       await session.commitTransaction();
@@ -75,19 +75,19 @@ export async function POST(req, { params }) {
       );
     }
 
-    // Create disbursement record
-    const disbursement = await Disbursement.create([{
+    // Create payout record
+    const payout = await payout.create([{
       requestId: fundRequest._id,
       amount: fundRequest.amount,
-      disbursedBy,
-      disbursedAt: new Date(),
+      payoutdBy,
+      payoutdAt: new Date(),
       transactionReference,
       notes,
       status: "pending"
     }], { session });
 
     // Update fund request status
-    fundRequest.status = "disbursed";
+    fundRequest.status = "payoutd";
     await fundRequest.save({ session });
 
     // Update budget
@@ -98,8 +98,8 @@ export async function POST(req, { params }) {
     session.endSession();
 
     return NextResponse.json({
-      message: "Funds disbursed successfully",
-      disbursement: disbursement[0],
+      message: "Funds payoutd successfully",
+      payout: payout[0],
     }, { status: 201 });
   } catch (error) {
     await session.abortTransaction();

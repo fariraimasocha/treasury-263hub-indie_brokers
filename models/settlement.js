@@ -3,9 +3,9 @@ import { refreshModel } from "@/utils/modelUtils";
 
 const settlementSchema = new mongoose.Schema(
   {
-    disbursementId: {
+    payoutId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Disbursement",
+      ref: "payout",
       required: true,
     },
     requestId: {

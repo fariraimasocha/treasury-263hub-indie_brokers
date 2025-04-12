@@ -1,7 +1,7 @@
-// app/api/disbursements/[id]/settle/route.js
+// app/api/payouts/[id]/settle/route.js
 import { NextResponse } from "next/server";
 import { connect } from "@/utils/connect";
-import Disbursement from "@/models/disbursement";
+import payout from "@/models/payout";
 import FundRequest from "@/models/fundRequest";
 import Budget from "@/models/budget";
 import Settlement from "@/models/settlement";
@@ -23,18 +23,18 @@ export async function POST(req, { params }) {
       );
     }
 
-    const disbursement = await Disbursement.findById(id).session(session);
+    const payout = await payout.findById(id).session(session);
     
-    if (!disbursement) {
+    if (!payout) {
       await session.abortTransaction();
       session.endSession();
       return NextResponse.json(
-        { message: "Disbursement not found" },
+        { message: "payout not found" },
         { status: 404 }
       );
     }
 
-    const fundRequest = await FundRequest.findById(disbursement.requestId).session(session);
+    const fundRequest = await FundRequest.findById(payout.requestId).session(session);
     
     if (!fundRequest) {
       await session.abortTransaction();
@@ -45,11 +45,11 @@ export async function POST(req, { params }) {
       );
     }
 
-    if (fundRequest.status !== "DISBURSED") {
+    if (fundRequest.status !== "payoutD") {
       await session.abortTransaction();
       session.endSession();
       return NextResponse.json(
-        { message: "Only disbursed requests can be settled" },
+        { message: "Only payoutd requests can be settled" },
         { status: 400 }
       );
     }
@@ -71,12 +71,12 @@ export async function POST(req, { params }) {
     }
 
     // Calculate remaining balance
-    const initialBudget = budget.remainingAmount + disbursement.amount;
-    const remainingBalance = budget.remainingAmount + (disbursement.amount - amountUsed);
+    const initialBudget = budget.remainingAmount + payout.amount;
+    const remainingBalance = budget.remainingAmount + (payout.amount - amountUsed);
 
     // Create settlement record
     const settlement = await Settlement.create([{
-      disbursementId: disbursement._id,
+      payoutId: payout._id,
       requestId: fundRequest._id,
       initialBudget,
       amountUsed,
@@ -106,9 +106,9 @@ export async function POST(req, { params }) {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.log("Error while settling disbursement: ", error);
+    console.log("Error while settling payout: ", error);
     return NextResponse.json(
-      { message: "Error while settling disbursement" },
+      { message: "Error while settling payout" },
       { status: 500 }
     );
   }

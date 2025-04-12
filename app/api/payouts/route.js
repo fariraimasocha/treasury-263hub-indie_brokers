@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connect } from "@/utils/connect";
-import Disbursement from "@/models/disbursement";
+import payout from "@/models/payout";
 
 export async function GET(req) {
   try {
@@ -12,18 +12,18 @@ export async function GET(req) {
     let query = {};
     if (requestId) query.requestId = requestId;
 
-    const disbursements = await Disbursement.find(query)
+    const payouts = await payout.find(query)
       .populate("requestId")
-      .populate("disbursedBy");
+      .populate("payoutdBy");
 
     return NextResponse.json({
-      message: "Disbursements fetched successfully",
-      disbursements,
+      message: "payouts fetched successfully",
+      payouts,
     });
   } catch (error) {
-    console.log("Error while fetching disbursements: ", error);
+    console.log("Error while fetching payouts: ", error);
     return NextResponse.json(
-      { message: "Error while fetching disbursements" },
+      { message: "Error while fetching payouts" },
       { status: 500 }
     );
   }
