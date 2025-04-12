@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { refreshModel } from "@/utils/modelUtils";
 
-const disbursementSchema = new mongoose.Schema(
+const payoutschema = new mongoose.Schema(
   {
     requestId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -12,12 +12,12 @@ const disbursementSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    disbursedBy: {
+    payoutdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    disbursedAt: {
+    payoutdAt: {
       type: Date,
       default: Date.now,
     },
@@ -39,5 +39,5 @@ const disbursementSchema = new mongoose.Schema(
   }
 );
 
-const Disbursement = refreshModel("Disbursement", disbursementSchema);
-export default Disbursement;
+const payout = refreshModel("payout", payoutschema);
+export default payout;
