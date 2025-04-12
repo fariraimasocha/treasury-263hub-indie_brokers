@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Home } from "lucide-react";
+import { Home, Users, MapPinHouse } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
@@ -30,8 +30,18 @@ import {
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/dashboard",
     icon: Home,
+  },
+  {
+    title: "Users",
+    url: "/dashboard/users",
+    icon: Users,
+  },
+  {
+    title: "Departments",
+    url: "/dashboard/departments",
+    icon: MapPinHouse,
   },
 ];
 
