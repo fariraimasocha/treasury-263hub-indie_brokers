@@ -33,6 +33,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import CircularSpinner from "@/components/Loading";
 
 // Form schema for new user
 const userFormSchema = z.object({
@@ -117,11 +118,7 @@ export default function Users() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        Loading users...
-      </div>
-    );
+    return <CircularSpinner size="small" color="text-gray-900" />;
   }
 
   if (isError) {
