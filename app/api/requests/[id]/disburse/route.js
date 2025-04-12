@@ -33,7 +33,7 @@ export async function POST(req, { params }) {
       );
     }
 
-    if (fundRequest.status !== "APPROVED") {
+    if (fundRequest.status !== "approved") {
       await session.abortTransaction();
       session.endSession();
       return NextResponse.json(
@@ -44,14 +44,25 @@ export async function POST(req, { params }) {
 
     // Check budget availability
     const budget = await Budget.findOne({ 
-      departmentId: fundRequest.departmentId,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() }
+      dept: fundRequest.dept,
+      year: fundRequest.year,
+      quater: fundRequest.quater,
+      status: "approved"
     }).session(session);
 
-    if (!budget || budget.remainingAmount < fundRequest.amount) {
+    if (!budget) {
+      await session.abortTransaction();
+      session.endSession();
+      return NextResponse.json(
+        { message: "No approved budget found for this department, year and quarter" },
+        { status: 404 }
+      );
+    }
+
+    // Check if there's enough remaining budget
+    if (!budget.remainingAmount || budget.remainingAmount < fundRequest.amount) {
       // Reject the request due to insufficient budget
-      fundRequest.status = "REJECTED";
+      fundRequest.status = "rejected";
       fundRequest.rejectionReason = "Insufficient budget for disbursement";
       await fundRequest.save({ session });
       
@@ -71,15 +82,16 @@ export async function POST(req, { params }) {
       disbursedBy,
       disbursedAt: new Date(),
       transactionReference,
-      notes
+      notes,
+      status: "pending"
     }], { session });
 
     // Update fund request status
-    fundRequest.status = "DISBURSED";
+    fundRequest.status = "disbursed";
     await fundRequest.save({ session });
 
     // Update budget
-    budget.remainingAmount -= fundRequest.amount;
+    budget.remainingAmount = (budget.remainingAmount || budget.budget) - fundRequest.amount;
     await budget.save({ session });
 
     await session.commitTransaction();
