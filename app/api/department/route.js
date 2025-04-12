@@ -10,14 +10,13 @@ export async function POST(req) {
 
     if (!name ) {
       return NextResponse.json(
-        { message: "Name and description are required." },
+        { message: "Department name is required." },
         { status: 400 }
       );
     }
 
     await Department.create({
       name,
-      description,
     });
 
     return NextResponse.json(
