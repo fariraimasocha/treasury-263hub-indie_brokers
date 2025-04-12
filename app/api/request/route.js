@@ -37,3 +37,22 @@ export async function POST(req) {
         );
     }
 }
+
+export async function GET(req) {
+    try {
+        await connect();
+    
+        const requests = await Request.find().populate("dept");
+    
+        return NextResponse.json({
+        message: "Requests fetched successfully",
+        requests,
+        });
+    } catch (error) {
+        console.log("Error while fetching requests: ", error);
+        return NextResponse.json(
+        { message: "Error while fetching requests" },
+        { status: 500 }
+        );
+    }
+}

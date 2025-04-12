@@ -33,3 +33,22 @@ export async function POST(req) {
     );
   }
 }
+
+export async function GET(req) {
+  try {
+    await connect();
+
+    const departments = await Department.find();
+
+    return NextResponse.json({
+      message: "Departments fetched successfully",
+      departments,
+    });
+  } catch (error) {
+    console.log("Error while fetching departments: ", error);
+    return NextResponse.json(
+      { message: "Error while fetching departments" },
+      { status: 500 }
+    );
+  }
+}
