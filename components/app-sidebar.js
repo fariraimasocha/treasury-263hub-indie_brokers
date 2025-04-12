@@ -7,6 +7,7 @@ import {
   MapPinHouse,
   BadgeDollarSign,
   HandCoins,
+  CircleDollarSign,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -58,6 +59,11 @@ const items = [
     title: "Requests",
     url: "/dashboard/requests",
     icon: HandCoins,
+  },
+  {
+    title: "Payments",
+    url: "https://payfari.co.zw/",
+    icon: CircleDollarSign,
   },
 ];
 

@@ -29,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,15 +38,14 @@ import CircularSpinner from "@/components/Loading";
 
 // Form schema for new request
 const requestFormSchema = z.object({
-  dept: z.string().min(1, "Department is required"),
-  amount: z.string().refine((val) => !isNaN(val) && Number(val) > 0, {
-    message: "Amount must be a valid positive number",
-  }),
-  purpose: z.string().min(5, "Purpose must be at least 5 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  dept: z.string().min(2, "Department must be at least 2 characters"),
+  budget: z.string().min(1, "Budget is required"),
+  year: z.string().min(4, "Please enter a valid year"),
+  quater: z.string().min(1, "Quarter is required"),
+  comment: z.string().optional(),
 });
 
-export default function Requests() {
+export default function RequestsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,27 +55,16 @@ export default function Requests() {
     resolver: zodResolver(requestFormSchema),
     defaultValues: {
       dept: "",
-      amount: "",
-      purpose: "",
-      description: "",
+      budget: "",
+      year: "",
+      quater: "",
+      comment: "",
     },
   });
 
-  // Fetch departments for the dropdown
-  const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
-    queryKey: ["departments"],
-    queryFn: async () => {
-      const response = await fetch("/api/department");
-      const data = await response.json();
-      return data.departments;
-    },
-  });
-
-  // Fetch requests
   const fetchRequests = async () => {
     const response = await fetch("/api/requests");
-    const data = await response.json();
-    return data.requests;
+    return response.json();
   };
 
   const {
@@ -89,32 +78,23 @@ export default function Requests() {
   });
 
   // Filter requests based on search query
-  const filteredRequests = requests?.filter((request) => {
-    const deptName =
-      departments?.find((d) => d._id === request.dept)?.name || "";
-    return (
-      deptName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.purpose.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      request.status.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  const filteredRequests = requests?.filter(
+    (request) =>
+      request.dept?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.budget?.toString().includes(searchQuery) ||
+      request.year?.toString().includes(searchQuery) ||
+      request.quater?.toString().includes(searchQuery)
+  );
 
   const handleAddRequest = async (data) => {
     setIsSubmitting(true);
     try {
-      // Convert numeric strings to numbers
-      const formattedData = {
-        ...data,
-        amount: parseFloat(data.amount),
-      };
-
       const response = await fetch("/api/requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formattedData),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -124,12 +104,7 @@ export default function Requests() {
 
       toast.success("Request created successfully!");
       setIsDialogOpen(false);
-      form.reset({
-        dept: "",
-        amount: "",
-        purpose: "",
-        description: "",
-      });
+      form.reset();
 
       // Refresh the requests data
       queryClient.invalidateQueries(["requests"]);
@@ -143,33 +118,7 @@ export default function Requests() {
     }
   };
 
-  // Helper function to find department name by ID
-  const getDepartmentName = (deptId) => {
-    if (!departments) return "Loading...";
-    const dept = departments.find((d) => d._id === deptId);
-    return dept ? dept.name : "Unknown Department";
-  };
-
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
-
-  // Format date
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  if (isLoading || isDepartmentsLoading) {
+  if (isLoading) {
     return <CircularSpinner size="small" color="text-gray-900" />;
   }
 
@@ -179,7 +128,7 @@ export default function Requests() {
 
   return (
     <div className="container py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Request Management</h1>
+      <h1 className="text-2xl font-bold mb-6">Budget Requests</h1>
 
       {/* Search Input */}
       <div className="flex justify-between items-center mb-6">
@@ -189,7 +138,7 @@ export default function Requests() {
             size={20}
           />
           <Input
-            placeholder="Search by department, purpose, or status..."
+            placeholder="Search requests by department, budget or year..."
             className="pl-10 w-full"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -197,7 +146,7 @@ export default function Requests() {
         </div>
 
         <Button onClick={() => setIsDialogOpen(true)}>
-          Create New Request
+          New Budget Request
         </Button>
       </div>
 
@@ -207,10 +156,10 @@ export default function Requests() {
           <TableHeader>
             <TableRow>
               <TableHead>Department</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Purpose</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Budget</TableHead>
+              <TableHead>Year</TableHead>
+              <TableHead>Quarter</TableHead>
+              <TableHead>Comment</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -218,41 +167,19 @@ export default function Requests() {
             {filteredRequests && filteredRequests.length > 0 ? (
               filteredRequests.map((request) => (
                 <TableRow key={request._id}>
-                  <TableCell className="font-medium">
-                    {getDepartmentName(request.dept)}
-                  </TableCell>
-                  <TableCell>{formatCurrency(request.amount)}</TableCell>
-                  <TableCell
-                    className="max-w-[200px] truncate"
-                    title={request.purpose}
-                  >
-                    {request.purpose}
-                  </TableCell>
-                  <TableCell>{formatDate(request.createdAt)}</TableCell>
+                  <TableCell className="font-medium">{request.dept}</TableCell>
+                  <TableCell>{request.budget}</TableCell>
+                  <TableCell>{request.year}</TableCell>
+                  <TableCell>{request.quater}</TableCell>
+                  <TableCell>{request.comment}</TableCell>
                   <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        request.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : request.status === "rejected"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {request.status.charAt(0).toUpperCase() +
-                        request.status.slice(1)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
+                    <Button variant="outline">Update</Button>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
+                <TableCell colSpan={5} className="text-center py-4">
                   {searchQuery
                     ? "No requests match your search."
                     : "No requests found."}
@@ -273,11 +200,11 @@ export default function Requests() {
 
       {/* Add Request Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create New Request</DialogTitle>
+            <DialogTitle>Create Budget Request</DialogTitle>
             <DialogDescription>
-              Fill out this form to submit a new financial request.
+              Fill in the details to create a new budget request.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -292,16 +219,54 @@ export default function Requests() {
                   <FormItem>
                     <FormLabel>Department</FormLabel>
                     <FormControl>
+                      <Input placeholder="Finance" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="budget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Budget</FormLabel>
+                    <FormControl>
+                      <Input placeholder="100000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Year</FormLabel>
+                    <FormControl>
+                      <Input placeholder="2025" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="quater"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quarter</FormLabel>
+                    <FormControl>
                       <select
                         className="w-full border rounded-md px-3 py-2"
                         {...field}
                       >
-                        <option value="">Select Department</option>
-                        {departments?.map((dept) => (
-                          <option key={dept._id} value={dept._id}>
-                            {dept.name}
-                          </option>
-                        ))}
+                        <option value="">Select Quarter</option>
+                        <option value="Q1">Q1</option>
+                        <option value="Q2">Q2</option>
+                        <option value="Q3">Q3</option>
+                        <option value="Q4">Q4</option>
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -310,48 +275,16 @@ export default function Requests() {
               />
               <FormField
                 control={form.control}
-                name="amount"
+                name="comment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Amount Requested</FormLabel>
+                    <FormLabel>Comment</FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="1000.00"
-                        step="0.01"
-                        min="0"
+                      <Textarea
+                        placeholder="Add additional details about this request..."
+                        className="resize-none"
                         {...field}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="purpose"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Purpose</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Office supplies" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <textarea
-                        className="w-full border rounded-md px-3 py-2 h-20"
-                        placeholder="Detailed description of what the funds will be used for..."
-                        {...field}
-                      ></textarea>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -366,7 +299,7 @@ export default function Requests() {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                  {isSubmitting ? "Creating..." : "Create Request"}
                 </Button>
               </DialogFooter>
             </form>

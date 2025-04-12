@@ -1,76 +1,48 @@
-import { NextResponse } from "next/server";
 import { connect } from "@/utils/connect";
-import FundRequest from "@/models/request";
+import { NextResponse } from "next/server";
+import Request from "@/models/request";
+
+export async function GET(request) {
+  try {
+    await connect();
+    const requests = await Request.find({});
+    return NextResponse.json(requests);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch requests" });
+  }
+}
 
 export async function POST(req) {
   try {
     await connect();
+    const body = await req.json();
+    const { dept, budget, year, quater, comment } = body;
 
-    const { dept, requesterId, amount, purpose, priority, notes, year, quater } = await req.json();
-
-    if (!dept || !requesterId || !amount || !purpose || !year || !quater) {
-      return NextResponse.json(
-        { message: "Department, requester, amount, purpose, year, and quarter are required." },
-        { status: 400 }
-      );
-    }
-
-    const fundRequest = await FundRequest.create({
+    console.log("Creating request with data:", {
       dept,
-      requesterId,
-      amount,
-      purpose,
-      priority: priority || "medium",
-      notes,
-      status: "draft",
+      budget,
       year,
       quater,
+      comment,
     });
 
+    const request = new Request({
+      dept,
+      budget,
+      year,
+      quater,
+      comment,
+    });
+
+    await request.save();
+    return NextResponse.json(request);
+  } catch (error) {
+    console.error("Error creating request:", error);
     return NextResponse.json(
       {
-        message: "Fund request created successfully",
-        fundRequest,
+        error: "Failed to create request",
+        message: error.message,
       },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.log("Error while creating fund request: ", error);
-    return NextResponse.json(
-      { message: "Error while creating fund request" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(req) {
-  try {
-    await connect();
-
-    const { searchParams } = new URL(req.url);
-    const dept = searchParams.get("dept");
-    const status = searchParams.get("status");
-    const year = searchParams.get("year");
-    const quater = searchParams.get("quater");
-
-    let query = {};
-    if (dept) query.dept = dept;
-    if (status) query.status = status;
-    if (year) query.year = parseInt(year);
-    if (quater) query.quater = parseInt(quater);
-
-    const fundRequests = await FundRequest.find(query)
-      .populate("requesterId")
-      .populate("approverId");
-
-    return NextResponse.json({
-      message: "Fund requests fetched successfully",
-      fundRequests,
-    });
-  } catch (error) {
-    console.log("Error while fetching fund requests: ", error);
-    return NextResponse.json(
-      { message: "Error while fetching fund requests" },
       { status: 500 }
     );
   }
