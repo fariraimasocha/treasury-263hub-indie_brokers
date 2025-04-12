@@ -25,6 +25,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import CircularSpinner from "@/components/Loading";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -127,6 +128,18 @@ export default function SignIn() {
                 "Sign In"
               )}
             </Button>
+
+            <div className="text-center space-y-2">
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/auth/signUp"
+                  className="text-primary hover:underline"
+                >
+                  Sign Up
+                </Link>
+              </p>
+            </div>
           </form>
         </Form>
       </CardContent>

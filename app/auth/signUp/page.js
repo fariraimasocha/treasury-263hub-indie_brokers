@@ -226,6 +226,17 @@ export default function SignUp() {
                 "Sign Up"
               )}
             </Button>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  href="/auth/signIn"
+                  className="text-primary hover:underline"
+                >
+                  Sign In
+                </Link>
+              </p>
+            </div>
           </form>
         </Form>
       </CardContent>
