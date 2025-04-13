@@ -9,6 +9,7 @@ import {
   HandCoins,
   CircleDollarSign,
   BadgeCent,
+  UsersRound,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -70,6 +71,11 @@ const items = [
     title: "Blockchain",
     url: "/dashboard/blockchain",
     icon: BadgeCent,
+  },
+  {
+    title: "Team",
+    url: "https://sahwira.vercel.app/",
+    icon: UsersRound,
   },
 ];
 
